@@ -11,11 +11,19 @@ $cuentas = db()->query(
 layoutHead('Plan de cuentas');
 ?>
 <div class="d-flex justify-content-between mb-3">
-    <p class="text-muted mb-0">Las cuentas marcadas como <strong>imputables</strong> son las únicas
-        que se pueden usar en los comprobantes.</p>
-    <?php if (hasRole('admin','operador')): ?>
-        <a class="btn btn-primary" href="<?= e(url('/cuentas/nueva.php')) ?>">+ Nueva cuenta</a>
-    <?php endif; ?>
+    <p class="text-muted mb-0">
+        Las cuentas marcadas como <strong>imputables</strong> son las únicas
+        que se pueden usar en los comprobantes.<br>
+        <small>Total: <strong><?= count($cuentas) ?>/15</strong> cuentas.</small>
+    </p>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-dark" target="_blank"
+           href="<?= e(url('/cuentas/imprimir.php')) ?>">Imprimir</a>
+        <?php if (hasRole('admin','operador')): ?>
+            <a class="btn btn-primary <?= count($cuentas) >= 15 ? 'disabled' : '' ?>"
+               href="<?= e(url('/cuentas/nueva.php')) ?>">+ Nueva cuenta</a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <table class="table table-striped table-sm">

@@ -6,7 +6,9 @@ fácil de instalar y entender, no para algo "tan pro". Incluye:
 - Login con sesiones y 3 roles (`admin`, `operador`, `consulta`).
 - Módulo de **Usuarios** (alta / edición / activar / cambiar contraseña).
 - **Plan de Cuentas** jerárquico (activo / pasivo / patrimonio / ingreso / egreso),
-  con cuentas imputables vs. no imputables.
+  con cuentas imputables vs. no imputables. Códigos en formato fijo
+  `X.X.XX.XX.XX` (8 dígitos), validados en cliente y servidor. Tope: 15 cuentas.
+  Vista de impresión disponible.
 - **Comprobantes** con cabecera + detalles (debe / haber), validación de partida
   doble (`debe = haber`) y numeración automática.
 - **Libro Diario**, **Libro Mayor** (con saldo inicial y saldo corriente) y

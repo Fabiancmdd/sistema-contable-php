@@ -3,6 +3,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
 requireRole('admin','operador');
 
+const CODIGO_PATTERN_RE   = '/^\d\.\d\.\d{2}\.\d{2}\.\d{2}$/';
+const CODIGO_PATTERN_HTML = '\d\.\d\.\d{2}\.\d{2}\.\d{2}';
+const CODIGO_EJEMPLO      = '1.0.00.00.00';
+
 $id = (int)($_GET['id'] ?? 0);
 $stmt = db()->prepare('SELECT * FROM cuentas WHERE id = ?');
 $stmt->execute([$id]);
@@ -34,8 +38,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $imputableNuevo      = isset($_POST['imputable']) ? 1 : 0;
     $cuenta['activo']    = isset($_POST['activo']) ? 1 : 0;
 
-    if ($cuenta['codigo'] === '') $errores[] = 'Código obligatorio.';
-    if ($cuenta['nombre'] === '') $errores[] = 'Nombre obligatorio.';
+    if ($cuenta['codigo'] === '') {
+        $errores[] = 'Código obligatorio.';
+    } elseif (!preg_match(CODIGO_PATTERN_RE, $cuenta['codigo'])) {
+        $errores[] = 'Formato de código inválido. Debe ser ' . CODIGO_EJEMPLO . ' (8 dígitos: X.X.XX.XX.XX).';
+    }
+    if ($cuenta['nombre'] === '') {
+        $errores[] = 'Nombre obligatorio.';
+    } elseif (mb_strlen($cuenta['nombre']) < 2 || mb_strlen($cuenta['nombre']) > 150) {
+        $errores[] = 'Nombre debe tener entre 2 y 150 caracteres.';
+    }
+    if (!in_array($cuenta['tipo'], ['activo','pasivo','patrimonio','ingreso','egreso'], true)) {
+        $errores[] = 'Tipo inválido.';
+    }
+    if ($cuenta['padre_id'] !== null) {
+        if ((int)$cuenta['padre_id'] === $id) {
+            $errores[] = 'Una cuenta no puede ser padre de sí misma.';
+        } else {
+            $stmt = db()->prepare('SELECT imputable FROM cuentas WHERE id = ?');
+            $stmt->execute([(int)$cuenta['padre_id']]);
+            $row = $stmt->fetch();
+            if (!$row) {
+                $errores[] = 'Cuenta padre inexistente.';
+            } elseif ((int)$row['imputable'] === 1) {
+                $errores[] = 'La cuenta padre no puede ser imputable.';
+            }
+        }
+    }
     if ($tieneMovs > 0 && $imputableNuevo !== (int)$cuenta['imputable']) {
         $errores[] = 'No se puede cambiar "imputable" porque la cuenta ya tiene movimientos.';
         $imputableNuevo = (int)$cuenta['imputable'];
@@ -74,11 +103,19 @@ layoutHead('Editar cuenta ' . $cuenta['codigo']);
     <div class="row g-3">
         <div class="col-md-4">
             <label class="form-label">Código</label>
-            <input class="form-control" name="codigo" value="<?= e($cuenta['codigo']) ?>" required>
+            <input class="form-control" name="codigo"
+                   value="<?= e($cuenta['codigo']) ?>"
+                   pattern="<?= CODIGO_PATTERN_HTML ?>"
+                   placeholder="<?= CODIGO_EJEMPLO ?>"
+                   title="Formato: X.X.XX.XX.XX (8 dígitos, ej: <?= CODIGO_EJEMPLO ?>)"
+                   maxlength="12" required>
+            <small class="text-muted">8 dígitos: <code><?= CODIGO_EJEMPLO ?></code></small>
         </div>
         <div class="col-md-8">
             <label class="form-label">Nombre</label>
-            <input class="form-control" name="nombre" value="<?= e($cuenta['nombre']) ?>" required>
+            <input class="form-control" name="nombre"
+                   value="<?= e($cuenta['nombre']) ?>"
+                   minlength="2" maxlength="150" required>
         </div>
         <div class="col-md-6">
             <label class="form-label">Tipo</label>
