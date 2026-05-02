@@ -1,0 +1,1 @@
+# Sistema Contable\n\nProyecto inicializado. Ver PR para el código completo.\n
