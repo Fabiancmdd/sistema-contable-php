@@ -1,0 +1,25 @@
+body { background: #f7f8fa; }
+main.container { max-width: 1200px; }
+
+.tabla-asiento input { text-align: right; }
+.tabla-asiento td.cuenta { width: 40%; }
+
+.modo-impresion {
+    background: #fff;
+}
+.modo-impresion main.container {
+    max-width: 100%;
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    main.container { max-width: 100%; }
+    a[href]:after { content: ""; }
+    .table { font-size: 11px; }
+}
+
+.totales-asiento {
+    background: #f1f3f5;
+    font-weight: 600;
+}

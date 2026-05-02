@@ -1,0 +1,13 @@
+# Bloquear archivos sensibles desde el navegador.
+# Apache 2.4 usa "Require all denied"; las primeras dos directivas
+# son por compatibilidad con Apache 2.2.
+<FilesMatch "^(config\.php|config\.example\.php|install\.php)$">
+    Order deny,allow
+    Deny from all
+    Require all denied
+</FilesMatch>
+
+# Si alguien pega la URL de la raíz, mandarlo a login.php en vez de
+# mostrar el listado del directorio.
+DirectoryIndex index.php
+Options -Indexes
