@@ -18,15 +18,23 @@ function _ensureConfigured(): void
     $script = $_SERVER['SCRIPT_NAME'] ?? '';
     if (str_ends_with($script, '/setup.php')) return;
 
-    // Calcular base path para redirigir correctamente bajo XAMPP/subdir
-    $pos  = strrpos($script, '/public/');
-    $base = $pos !== false ? substr($script, 0, $pos + strlen('/public')) : '';
+    // Calcular base path (mismo método que helpers::basePath, duplicado acá
+    // porque helpers.php podría no haberse cargado todavía).
+    $projectRoot = str_replace('\\', '/', dirname(__DIR__));
+    $scriptFile  = str_replace('\\', '/', (string)($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $base = '';
+    if ($projectRoot !== '' && $scriptFile !== '' && str_starts_with($scriptFile, $projectRoot)) {
+        $rel = substr($scriptFile, strlen($projectRoot));
+        if ($rel !== '' && str_ends_with($script, $rel)) {
+            $base = substr($script, 0, strlen($script) - strlen($rel));
+        }
+    }
     if (PHP_SAPI !== 'cli' && !headers_sent()) {
         header('Location: ' . $base . '/setup.php');
         exit;
     }
     http_response_code(500);
-    exit('Falta config.php. Abrí el instalador en /public/setup.php o copiá config.example.php a config.php.');
+    exit('Falta config.php. Abrí el instalador en /setup.php o copiá config.example.php a config.php.');
 }
 
 function db(): PDO

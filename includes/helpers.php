@@ -9,12 +9,15 @@ function e(?string $s): string
 /**
  * Devuelve el prefijo URL del proyecto (sin slash final).
  *
- * - Si el document root del servidor apunta a `public/` (ej. `php -S` o un
- *   vhost configurado), devuelve "".
- * - Si el proyecto está bajo XAMPP en `htdocs/<nombre>/public/`, devuelve
- *   `/<nombre>/public`.
+ *  - Si servís la raíz del proyecto directo (ej. `php -S 0.0.0.0:8000`),
+ *    devuelve "".
+ *  - Si el proyecto está bajo XAMPP en `htdocs/<nombre>/`, devuelve
+ *    `/<nombre>` y se aplica automáticamente a todas las URLs internas.
  *
- * Detecta esto buscando el segmento `/public/` en `SCRIPT_NAME`.
+ * Estrategia: el archivo `helpers.php` vive en `<projectRoot>/includes/`,
+ * así que sabemos cuál es el filesystem path del proyecto. Comparándolo
+ * contra `SCRIPT_FILENAME` averiguamos qué porción de `SCRIPT_NAME` es
+ * el prefijo URL.
  */
 function basePath(): string
 {
@@ -22,10 +25,15 @@ function basePath(): string
     if ($cache !== null) {
         return $cache;
     }
-    $script = $_SERVER['SCRIPT_NAME'] ?? '';
-    $pos = strrpos($script, '/public/');
-    if ($pos !== false) {
-        return $cache = substr($script, 0, $pos + strlen('/public'));
+    $projectRoot = str_replace('\\', '/', dirname(__DIR__));
+    $scriptFile  = str_replace('\\', '/', (string)($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    $scriptName  = (string)($_SERVER['SCRIPT_NAME'] ?? '');
+
+    if ($projectRoot !== '' && $scriptFile !== '' && str_starts_with($scriptFile, $projectRoot)) {
+        $rel = substr($scriptFile, strlen($projectRoot)); // ej. "/login.php" o "/usuarios/nuevo.php"
+        if ($rel !== '' && str_ends_with($scriptName, $rel)) {
+            return $cache = substr($scriptName, 0, strlen($scriptName) - strlen($rel));
+        }
     }
     return $cache = '';
 }

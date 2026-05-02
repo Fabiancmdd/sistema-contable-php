@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../includes/layout.php';
 requireRole('admin','operador','consulta');
 
 $desde     = $_GET['desde']     ?? date('Y-m-01');

@@ -1,0 +1,4 @@
+# Carpeta de código interno: no debe ser accesible vía web.
+Order deny,allow
+Deny from all
+Require all denied

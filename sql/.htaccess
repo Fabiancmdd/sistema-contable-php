@@ -1,0 +1,4 @@
+# Scripts SQL: no deben ser accesibles vía web.
+Order deny,allow
+Deny from all
+Require all denied

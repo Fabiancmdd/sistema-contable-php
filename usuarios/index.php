@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../includes/layout.php';
 requireRole('admin');
 
 $usuarios = db()->query('SELECT id, nombre, email, rol, activo, creado_en FROM usuarios ORDER BY id')->fetchAll();

@@ -28,8 +28,7 @@ fácil de instalar y entender, no para algo "tan pro". Incluye:
 ### Opción A — Asistente web (recomendada, ideal para XAMPP / WAMP / MAMP)
 
 1. Copiar la carpeta del proyecto en `htdocs/` (XAMPP) o equivalente.
-2. Abrir en el navegador: `http://localhost/<carpeta>/public/setup.php`
-   (si servís `public/` directo, alcanza con `http://localhost:8000/setup.php`).
+2. Abrir en el navegador: `http://localhost/<carpeta>/setup.php`
 3. Completar el formulario (host, usuario, password de MySQL, nombre de la BD,
    datos de la empresa) y darle a **Instalar**.
 4. El asistente crea `config.php`, la base de datos, las tablas, el plan de
@@ -52,7 +51,7 @@ cp config.example.php config.php
 php install.php
 
 # 4. Levantar el servidor de desarrollo
-php -S 0.0.0.0:8000 -t public
+php -S 0.0.0.0:8000
 # abrir http://localhost:8000/login.php
 ```
 
@@ -71,28 +70,27 @@ el plan de cuentas y los 3 usuarios demo.
 | `consulta@sistema.local`     | `consulta123`  | consulta |
 
 > Cambiar las contraseñas de ejemplo apenas se entre por primera vez.
-> En producción: eliminar `install.php` y `public/setup.php`, y servir solo
-> el directorio `public/` desde el web server.
+> En producción: eliminar `install.php` y `setup.php`. Las carpetas
+> `includes/`, `sql/` y los archivos `config.php` / `config.example.php`
+> ya están protegidos con `.htaccess` (Apache `Require all denied`).
 
 ## Estructura del proyecto
 
 ```
 sistema-contable-php/
-├── config.example.php     Plantilla de configuración (DB y empresa)
-├── install.php            Instalador por CLI (schema + seed + usuarios demo)
-├── sql/
-│   ├── schema.sql         Definición de tablas
-│   ├── seed.sql           Plan de cuentas inicial
-│   └── install_completo.sql  Script all-in-one (BD + tablas + plan + usuarios)
-├── includes/              Lógica compartida (DB, auth, layout, helpers)
-└── public/                Document root del servidor web
-    ├── index.php          Panel
-    ├── setup.php          Asistente web de instalación
-    ├── login.php / logout.php
-    ├── usuarios/          CRUD de usuarios (solo admin)
-    ├── cuentas/           CRUD del plan de cuentas
-    ├── comprobantes/      Alta, listado, detalle, anulación, impresión
-    └── reportes/          libro_diario / libro_mayor / estado_resultados
+├── .htaccess               Bloquea config.php, install.php y listing
+├── config.example.php      Plantilla de configuración (DB y empresa)
+├── install.php             Instalador por CLI (schema + seed + usuarios)
+├── setup.php               Asistente web de instalación
+├── index.php               Panel principal
+├── login.php / logout.php
+├── usuarios/               CRUD de usuarios (solo admin)
+├── cuentas/                CRUD del plan de cuentas
+├── comprobantes/           Alta, listado, detalle, anulación, impresión
+├── reportes/               libro_diario / libro_mayor / estado_resultados
+├── assets/                 CSS
+├── includes/               Lógica compartida + .htaccess (denied)
+└── sql/                    Schema/seed/install_completo + .htaccess (denied)
 ```
 
 ## Notas de diseño

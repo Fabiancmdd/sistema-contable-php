@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/../../includes/layout.php';
+require_once __DIR__ . '/../includes/layout.php';
 requireRole('admin','operador');
 
 $padres = db()->query('SELECT id, codigo, nombre FROM cuentas WHERE imputable = 0 ORDER BY codigo')->fetchAll();

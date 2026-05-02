@@ -14,7 +14,7 @@
  */
 declare(strict_types=1);
 
-$projectRoot = dirname(__DIR__);
+$projectRoot = __DIR__;
 $configFile  = $projectRoot . '/config.php';
 $exampleFile = $projectRoot . '/config.example.php';
 $schemaFile  = $projectRoot . '/sql/schema.sql';
@@ -23,13 +23,10 @@ $seedFile    = $projectRoot . '/sql/seed.sql';
 // Si ya está configurado, no permitir re-correr (a menos que ?force=1).
 $alreadyConfigured = file_exists($configFile) && empty($_GET['force']);
 
-// Calcular base path (mismo algoritmo que helpers::basePath)
-function _basePath(): string {
-    $script = $_SERVER['SCRIPT_NAME'] ?? '';
-    $pos = strrpos($script, '/public/');
-    return $pos !== false ? substr($script, 0, $pos + strlen('/public')) : '';
-}
-$base = _basePath();
+// Base path = directorio del script (ej. "/sistema-contable" en XAMPP, "" si servís la raíz)
+$_script = $_SERVER['SCRIPT_NAME'] ?? '';
+$base = rtrim(str_replace('\\', '/', dirname($_script)), '/');
+if ($base === '.') { $base = ''; }
 
 $errores = [];
 $ok      = false;
