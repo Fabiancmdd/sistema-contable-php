@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             db()->prepare($sql)->execute($params);
             flashSet('success', 'Usuario actualizado.');
-            redirect('/usuarios/index.php');
+            redirect(url('/usuarios/index.php'));
         } catch (PDOException $e) {
             $errores[] = 'Error al actualizar: ' . $e->getMessage();
         }
@@ -80,6 +80,6 @@ layoutHead('Editar usuario #' . (int)$usuario['id']);
         <label class="form-check-label" for="activo">Activo</label>
     </div>
     <button class="btn btn-primary">Guardar</button>
-    <a class="btn btn-outline-secondary" href="/usuarios/index.php">Cancelar</a>
+    <a class="btn btn-outline-secondary" href="<?= e(url('/usuarios/index.php')) ?>">Cancelar</a>
 </form>
 <?php layoutFoot();

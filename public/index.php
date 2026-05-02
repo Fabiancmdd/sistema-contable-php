@@ -40,9 +40,9 @@ layoutHead('Panel');
 
 <div class="row g-3">
     <?php if (hasRole('admin','operador')): ?>
-    <div class="col-md-4"><a class="btn btn-outline-primary w-100 py-3" href="/comprobantes/nuevo.php">+ Nuevo comprobante</a></div>
-    <div class="col-md-4"><a class="btn btn-outline-secondary w-100 py-3" href="/cuentas/index.php">Plan de cuentas</a></div>
+    <div class="col-md-4"><a class="btn btn-outline-primary w-100 py-3" href="<?= e(url('/comprobantes/nuevo.php')) ?>">+ Nuevo comprobante</a></div>
+    <div class="col-md-4"><a class="btn btn-outline-secondary w-100 py-3" href="<?= e(url('/cuentas/index.php')) ?>">Plan de cuentas</a></div>
     <?php endif; ?>
-    <div class="col-md-4"><a class="btn btn-outline-dark w-100 py-3" href="/reportes/libro_diario.php">Libro Diario</a></div>
+    <div class="col-md-4"><a class="btn btn-outline-dark w-100 py-3" href="<?= e(url('/reportes/libro_diario.php')) ?>">Libro Diario</a></div>
 </div>
 <?php layoutFoot();

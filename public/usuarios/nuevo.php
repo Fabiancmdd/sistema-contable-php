@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $datos['rol'], $datos['activo'],
             ]);
             flashSet('success', 'Usuario creado correctamente.');
-            redirect('/usuarios/index.php');
+            redirect(url('/usuarios/index.php'));
         } catch (PDOException $e) {
             $errores[] = 'No se pudo crear (¿email duplicado?). ' . $e->getMessage();
         }
@@ -69,6 +69,6 @@ layoutHead('Nuevo usuario');
         <label class="form-check-label" for="activo">Activo</label>
     </div>
     <button class="btn btn-primary">Guardar</button>
-    <a class="btn btn-outline-secondary" href="/usuarios/index.php">Cancelar</a>
+    <a class="btn btn-outline-secondary" href="<?= e(url('/usuarios/index.php')) ?>">Cancelar</a>
 </form>
 <?php layoutFoot();

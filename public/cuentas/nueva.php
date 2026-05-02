@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $datos['imputable'], $datos['activo'],
             ]);
             flashSet('success', 'Cuenta creada.');
-            redirect('/cuentas/index.php');
+            redirect(url('/cuentas/index.php'));
         } catch (PDOException $e) {
             $errores[] = 'No se pudo crear (¿código duplicado?). ' . $e->getMessage();
         }
@@ -90,7 +90,7 @@ layoutHead('Nueva cuenta');
     </div>
     <div class="mt-3">
         <button class="btn btn-primary">Guardar</button>
-        <a class="btn btn-outline-secondary" href="/cuentas/index.php">Cancelar</a>
+        <a class="btn btn-outline-secondary" href="<?= e(url('/cuentas/index.php')) ?>">Cancelar</a>
     </div>
 </form>
 <?php layoutFoot();

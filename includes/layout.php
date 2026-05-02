@@ -18,40 +18,40 @@ function layoutHead(string $titulo, bool $print = false): void
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($titulo) ?> · <?= e($nombreApp) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="<?= e(url('/assets/style.css')) ?>">
 </head>
 <body class="<?= $print ? 'modo-impresion' : '' ?>">
 <?php if (!$print): ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3 no-print">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/index.php"><?= e($nombreApp) ?></a>
+        <a class="navbar-brand" href="<?= e(url('/index.php')) ?>"><?= e($nombreApp) ?></a>
         <?php if ($u): ?>
         <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/index.php">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" href="<?= e(url('/index.php')) ?>">Inicio</a></li>
                 <?php if (hasRole('admin')): ?>
-                    <li class="nav-item"><a class="nav-link" href="/usuarios/index.php">Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= e(url('/usuarios/index.php')) ?>">Usuarios</a></li>
                 <?php endif; ?>
                 <?php if (hasRole('admin','operador')): ?>
-                    <li class="nav-item"><a class="nav-link" href="/cuentas/index.php">Plan de cuentas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/comprobantes/index.php">Comprobantes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= e(url('/cuentas/index.php')) ?>">Plan de cuentas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="<?= e(url('/comprobantes/index.php')) ?>">Comprobantes</a></li>
                 <?php endif; ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Reportes</a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/reportes/libro_diario.php">Libro Diario</a></li>
-                        <li><a class="dropdown-item" href="/reportes/libro_mayor.php">Libro Mayor</a></li>
-                        <li><a class="dropdown-item" href="/reportes/estado_resultados.php">Estado de Resultados</a></li>
+                        <li><a class="dropdown-item" href="<?= e(url('/reportes/libro_diario.php')) ?>">Libro Diario</a></li>
+                        <li><a class="dropdown-item" href="<?= e(url('/reportes/libro_mayor.php')) ?>">Libro Mayor</a></li>
+                        <li><a class="dropdown-item" href="<?= e(url('/reportes/estado_resultados.php')) ?>">Estado de Resultados</a></li>
                     </ul>
                 </li>
             </ul>
             <span class="navbar-text text-light me-3">
                 <?= e($u['nombre']) ?> <small class="opacity-75">(<?= e(rolLabel($u['rol'])) ?>)</small>
             </span>
-            <a class="btn btn-outline-light btn-sm" href="/logout.php">Salir</a>
+            <a class="btn btn-outline-light btn-sm" href="<?= e(url('/logout.php')) ?>">Salir</a>
         </div>
         <?php endif; ?>
     </div>

@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers.php';
 
 /**
  * Devuelve el usuario logueado o null.
@@ -37,7 +38,7 @@ function requireLogin(): array
     $u = currentUser();
     if ($u === null) {
         $redirect = $_SERVER['REQUEST_URI'] ?? '/';
-        header('Location: /login.php?redirect=' . urlencode($redirect));
+        header('Location: ' . url('/login.php') . '?redirect=' . urlencode($redirect));
         exit;
     }
     return $u;

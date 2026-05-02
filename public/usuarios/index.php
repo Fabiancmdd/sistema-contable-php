@@ -8,7 +8,7 @@ layoutHead('Usuarios');
 ?>
 <div class="d-flex justify-content-between mb-3">
     <div></div>
-    <a class="btn btn-primary" href="/usuarios/nuevo.php">+ Nuevo usuario</a>
+    <a class="btn btn-primary" href="<?= e(url('/usuarios/nuevo.php')) ?>">+ Nuevo usuario</a>
 </div>
 <table class="table table-striped">
     <thead><tr><th>#</th><th>Nombre</th><th>Email</th><th>Rol</th><th>Activo</th><th>Alta</th><th></th></tr></thead>
@@ -21,7 +21,7 @@ layoutHead('Usuarios');
             <td><?= e(rolLabel($u['rol'])) ?></td>
             <td><?= $u['activo'] ? 'Sí' : 'No' ?></td>
             <td><?= e($u['creado_en']) ?></td>
-            <td><a class="btn btn-sm btn-outline-secondary" href="/usuarios/editar.php?id=<?= (int)$u['id'] ?>">Editar</a></td>
+            <td><a class="btn btn-sm btn-outline-secondary" href="<?= e(url('/usuarios/editar.php')) ?>?id=<?= (int)$u['id'] ?>">Editar</a></td>
         </tr>
     <?php endforeach; ?>
     </tbody>

@@ -37,7 +37,7 @@ layoutHead('Comprobantes');
     </div>
     <?php if (hasRole('admin','operador')): ?>
     <div class="col-auto align-self-end ms-auto">
-        <a class="btn btn-primary" href="/comprobantes/nuevo.php">+ Nuevo</a>
+        <a class="btn btn-primary" href="<?= e(url('/comprobantes/nuevo.php')) ?>">+ Nuevo</a>
     </div>
     <?php endif; ?>
 </form>
@@ -58,7 +58,7 @@ layoutHead('Comprobantes');
             <td class="text-end"><?= money($r['total_debe']) ?></td>
             <td class="text-end"><?= money($r['total_haber']) ?></td>
             <td><?= e($r['usuario']) ?></td>
-            <td><a class="btn btn-sm btn-outline-secondary" href="/comprobantes/ver.php?id=<?= (int)$r['id'] ?>">Ver</a></td>
+            <td><a class="btn btn-sm btn-outline-secondary" href="<?= e(url('/comprobantes/ver.php')) ?>?id=<?= (int)$r['id'] ?>">Ver</a></td>
         </tr>
     <?php endforeach; ?>
     <?php if (!$rows): ?>

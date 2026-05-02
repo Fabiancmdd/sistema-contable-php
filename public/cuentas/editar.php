@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $cuenta['padre_id'], $cuenta['imputable'], $cuenta['activo'], $id,
             ]);
             flashSet('success', 'Cuenta actualizada.');
-            redirect('/cuentas/index.php');
+            redirect(url('/cuentas/index.php'));
         } catch (PDOException $e) {
             $errores[] = 'Error al actualizar: ' . $e->getMessage();
         }
@@ -112,7 +112,7 @@ layoutHead('Editar cuenta ' . $cuenta['codigo']);
     </div>
     <div class="mt-3">
         <button class="btn btn-primary">Guardar</button>
-        <a class="btn btn-outline-secondary" href="/cuentas/index.php">Cancelar</a>
+        <a class="btn btn-outline-secondary" href="<?= e(url('/cuentas/index.php')) ?>">Cancelar</a>
     </div>
 </form>
 <?php layoutFoot();

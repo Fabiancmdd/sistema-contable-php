@@ -8,4 +8,4 @@ $id = (int)($_POST['id'] ?? 0);
 $stmt = db()->prepare('UPDATE comprobantes SET anulado = 1 WHERE id = ?');
 $stmt->execute([$id]);
 flashSet('warning', 'Comprobante anulado.');
-redirect('/comprobantes/ver.php?id=' . $id);
+redirect(url('/comprobantes/ver.php') . '?id=' . $id);

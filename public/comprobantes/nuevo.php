@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $pdo->commit();
             flashSet('success', 'Comprobante Nº ' . $numero . ' guardado.');
-            redirect('/comprobantes/ver.php?id=' . $compId);
+            redirect(url('/comprobantes/ver.php') . '?id=' . $compId);
         } catch (Throwable $e) {
             $pdo->rollBack();
             $errores[] = 'Error al guardar: ' . $e->getMessage();
@@ -178,7 +178,7 @@ layoutHead('Nuevo comprobante');
     <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAgregar">+ Agregar renglón</button>
     <hr>
     <button class="btn btn-primary">Guardar comprobante</button>
-    <a class="btn btn-outline-secondary" href="/comprobantes/index.php">Cancelar</a>
+    <a class="btn btn-outline-secondary" href="<?= e(url('/comprobantes/index.php')) ?>">Cancelar</a>
 </form>
 
 <template id="tplFila">

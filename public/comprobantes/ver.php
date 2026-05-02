@@ -85,9 +85,9 @@ layoutHead('Comprobante Nº ' . $comp['numero'], $print);
 <?php if (!$print): ?>
 <div class="no-print">
     <a class="btn btn-outline-dark" href="?id=<?= $id ?>&print=1" target="_blank">Imprimir</a>
-    <a class="btn btn-outline-secondary" href="/comprobantes/index.php">Volver</a>
+    <a class="btn btn-outline-secondary" href="<?= e(url('/comprobantes/index.php')) ?>">Volver</a>
     <?php if (hasRole('admin') && !$comp['anulado']): ?>
-        <form method="post" action="/comprobantes/anular.php" class="d-inline" onsubmit="return confirm('¿Anular este comprobante?');">
+        <form method="post" action="<?= e(url('/comprobantes/anular.php')) ?>" class="d-inline" onsubmit="return confirm('¿Anular este comprobante?');">
             <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">
             <input type="hidden" name="id" value="<?= $id ?>">
             <button class="btn btn-outline-danger">Anular</button>

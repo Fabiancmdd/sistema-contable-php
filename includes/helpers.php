@@ -6,6 +6,42 @@ function e(?string $s): string
     return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/**
+ * Devuelve el prefijo URL del proyecto (sin slash final).
+ *
+ * - Si el document root del servidor apunta a `public/` (ej. `php -S` o un
+ *   vhost configurado), devuelve "".
+ * - Si el proyecto está bajo XAMPP en `htdocs/<nombre>/public/`, devuelve
+ *   `/<nombre>/public`.
+ *
+ * Detecta esto buscando el segmento `/public/` en `SCRIPT_NAME`.
+ */
+function basePath(): string
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    $pos = strrpos($script, '/public/');
+    if ($pos !== false) {
+        return $cache = substr($script, 0, $pos + strlen('/public'));
+    }
+    return $cache = '';
+}
+
+/**
+ * Construye una URL interna anteponiendo basePath().
+ * Pasar la ruta empezando con `/`, ej: url('/login.php').
+ */
+function url(string $path): string
+{
+    if ($path === '' || $path[0] !== '/') {
+        $path = '/' . $path;
+    }
+    return basePath() . $path;
+}
+
 function money($n): string
 {
     $cfg = appConfig();

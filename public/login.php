@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
 
 if (currentUser()) {
-    redirect('/index.php');
+    redirect(url('/index.php'));
 }
 
 $error = null;
@@ -11,9 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim((string)($_POST['email'] ?? ''));
     $clave = (string)($_POST['clave'] ?? '');
     if (login($email, $clave)) {
-        $r = $_GET['redirect'] ?? '/index.php';
+        $r = $_GET['redirect'] ?? url('/index.php');
+        // Sólo aceptar URLs internas (mismo prefijo) para evitar open redirect
         if (!is_string($r) || !preg_match('#^/[\w/.\-?=&%]*$#', $r)) {
-            $r = '/index.php';
+            $r = url('/index.php');
         }
         redirect($r);
     }

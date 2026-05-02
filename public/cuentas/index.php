@@ -14,7 +14,7 @@ layoutHead('Plan de cuentas');
     <p class="text-muted mb-0">Las cuentas marcadas como <strong>imputables</strong> son las únicas
         que se pueden usar en los comprobantes.</p>
     <?php if (hasRole('admin','operador')): ?>
-        <a class="btn btn-primary" href="/cuentas/nueva.php">+ Nueva cuenta</a>
+        <a class="btn btn-primary" href="<?= e(url('/cuentas/nueva.php')) ?>">+ Nueva cuenta</a>
     <?php endif; ?>
 </div>
 
@@ -32,7 +32,7 @@ layoutHead('Plan de cuentas');
             <td><?= $c['activo']    ? 'Sí' : 'No' ?></td>
             <td>
                 <?php if (hasRole('admin','operador')): ?>
-                    <a class="btn btn-sm btn-outline-secondary" href="/cuentas/editar.php?id=<?= (int)$c['id'] ?>">Editar</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="<?= e(url('/cuentas/editar.php')) ?>?id=<?= (int)$c['id'] ?>">Editar</a>
                 <?php endif; ?>
             </td>
         </tr>
