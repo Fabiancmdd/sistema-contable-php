@@ -25,6 +25,20 @@ fácil de instalar y entender, no para algo "tan pro". Incluye:
 
 ## Instalación
 
+### Opción A — Asistente web (recomendada, ideal para XAMPP / WAMP / MAMP)
+
+1. Copiar la carpeta del proyecto en `htdocs/` (XAMPP) o equivalente.
+2. Abrir en el navegador: `http://localhost/<carpeta>/public/setup.php`
+   (si servís `public/` directo, alcanza con `http://localhost:8000/setup.php`).
+3. Completar el formulario (host, usuario, password de MySQL, nombre de la BD,
+   datos de la empresa) y darle a **Instalar**.
+4. El asistente crea `config.php`, la base de datos, las tablas, el plan de
+   cuentas inicial y 3 usuarios demo. Después, redirige al login.
+5. Cualquier página antes de configurar redirige automáticamente a
+   `setup.php`, así que no hace falta recordar la URL.
+
+### Opción B — Por consola
+
 ```bash
 # 1. Clonar
 git clone https://github.com/Fabiancmdd/sistema-contable-php.git
@@ -36,32 +50,44 @@ cp config.example.php config.php
 
 # 3. Crear BD y datos iniciales
 php install.php
-# Esto crea la base, importa el schema, carga el plan de cuentas
-# y crea los usuarios de ejemplo:
-#    admin@sistema.local      / admin123      (rol admin)
-#    operador@sistema.local   / operador123   (rol operador)
-#    consulta@sistema.local   / consulta123   (rol consulta)
 
 # 4. Levantar el servidor de desarrollo
 php -S 0.0.0.0:8000 -t public
 # abrir http://localhost:8000/login.php
 ```
 
+### Opción C — Pegar el SQL directo en MySQL
+
+Si sólo querés cargar la base sin script de PHP, importá `sql/install_completo.sql`
+desde phpMyAdmin / Workbench / DBeaver / mysql CLI. Crea la BD, las tablas,
+el plan de cuentas y los 3 usuarios demo.
+
+### Usuarios demo (cualquiera de las opciones)
+
+| Email                        | Contraseña     | Rol      |
+|------------------------------|----------------|----------|
+| `admin@sistema.local`        | `admin123`     | admin    |
+| `operador@sistema.local`     | `operador123`  | operador |
+| `consulta@sistema.local`     | `consulta123`  | consulta |
+
 > Cambiar las contraseñas de ejemplo apenas se entre por primera vez.
-> En producción, eliminar `install.php` y servir solo el directorio `public/`.
+> En producción: eliminar `install.php` y `public/setup.php`, y servir solo
+> el directorio `public/` desde el web server.
 
 ## Estructura del proyecto
 
 ```
 sistema-contable-php/
 ├── config.example.php     Plantilla de configuración (DB y empresa)
-├── install.php            Instalador (schema + seed + usuarios demo)
+├── install.php            Instalador por CLI (schema + seed + usuarios demo)
 ├── sql/
 │   ├── schema.sql         Definición de tablas
-│   └── seed.sql           Plan de cuentas inicial
+│   ├── seed.sql           Plan de cuentas inicial
+│   └── install_completo.sql  Script all-in-one (BD + tablas + plan + usuarios)
 ├── includes/              Lógica compartida (DB, auth, layout, helpers)
 └── public/                Document root del servidor web
     ├── index.php          Panel
+    ├── setup.php          Asistente web de instalación
     ├── login.php / logout.php
     ├── usuarios/          CRUD de usuarios (solo admin)
     ├── cuentas/           CRUD del plan de cuentas
