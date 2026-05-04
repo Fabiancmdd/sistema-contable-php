@@ -6,10 +6,8 @@ requireRole('admin','operador');
 const CODIGO_PATTERN_RE   = '/^\d\.\d\.\d{2}\.\d{2}\.\d{2}$/';
 const CODIGO_PATTERN_HTML = '\d\.\d\.\d{2}\.\d{2}\.\d{2}';
 const CODIGO_EJEMPLO      = '1.0.00.00.00';
-const MAX_CUENTAS         = 15;
 
 $padres = db()->query('SELECT id, codigo, nombre FROM cuentas WHERE imputable = 0 ORDER BY codigo')->fetchAll();
-$totalCuentas = (int)db()->query('SELECT COUNT(*) FROM cuentas')->fetchColumn();
 
 $errores = [];
 $datos = [
@@ -25,9 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $datos['imputable'] = isset($_POST['imputable']) ? 1 : 0;
     $datos['activo']    = isset($_POST['activo'])    ? 1 : 0;
 
-    if ($totalCuentas >= MAX_CUENTAS) {
-        $errores[] = 'Tope alcanzado: ya hay ' . MAX_CUENTAS . ' cuentas. Borrá o desactivá una para crear otra.';
-    }
     if ($datos['codigo'] === '') {
         $errores[] = 'Código obligatorio.';
     } elseif (!preg_match(CODIGO_PATTERN_RE, $datos['codigo'])) {
@@ -78,24 +73,15 @@ layoutHead('Nueva cuenta');
     <?php foreach ($errores as $err): ?>
         <div class="alert alert-danger"><?= e($err) ?></div>
     <?php endforeach; ?>
-    <?php if ($totalCuentas >= MAX_CUENTAS): ?>
-        <div class="alert alert-warning small">
-            Tope alcanzado: ya tenés <?= $totalCuentas ?> de <?= MAX_CUENTAS ?> cuentas.
-            No se puede crear una nueva hasta liberar un cupo.
-        </div>
-    <?php else: ?>
-        <p class="text-muted small">
-            Cuentas usadas: <strong><?= $totalCuentas ?>/<?= MAX_CUENTAS ?></strong>.
-        </p>
-    <?php endif; ?>
     <div class="row g-3">
         <div class="col-md-4">
             <label class="form-label">Código</label>
-            <input class="form-control" name="codigo"
+            <input class="form-control codigo-cuenta" name="codigo"
                    value="<?= e($datos['codigo']) ?>"
                    pattern="<?= CODIGO_PATTERN_HTML ?>"
                    placeholder="<?= CODIGO_EJEMPLO ?>"
                    title="Formato: X.X.XX.XX.XX (8 dígitos, ej: <?= CODIGO_EJEMPLO ?>)"
+                   inputmode="numeric"
                    maxlength="12" required>
             <small class="text-muted">8 dígitos: <code><?= CODIGO_EJEMPLO ?></code></small>
         </div>
@@ -134,8 +120,9 @@ layoutHead('Nueva cuenta');
         </div>
     </div>
     <div class="mt-3">
-        <button class="btn btn-primary" <?= $totalCuentas >= MAX_CUENTAS ? 'disabled' : '' ?>>Guardar</button>
+        <button class="btn btn-primary">Guardar</button>
         <a class="btn btn-outline-secondary" href="<?= e(url('/cuentas/index.php')) ?>">Cancelar</a>
     </div>
 </form>
+<script src="<?= e(url('/assets/codigo-cuenta.js')) ?>"></script>
 <?php layoutFoot();

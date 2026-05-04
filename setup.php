@@ -14,11 +14,10 @@
  */
 declare(strict_types=1);
 
+require_once __DIR__ . '/includes/installer.php';
+
 $projectRoot = __DIR__;
 $configFile  = $projectRoot . '/config.php';
-$exampleFile = $projectRoot . '/config.example.php';
-$schemaFile  = $projectRoot . '/sql/schema.sql';
-$seedFile    = $projectRoot . '/sql/seed.sql';
 
 // Si ya está configurado, no permitir re-correr (a menos que ?force=1).
 $alreadyConfigured = file_exists($configFile) && empty($_GET['force']);
@@ -31,92 +30,19 @@ if ($base === '.') { $base = ''; }
 $errores = [];
 $ok      = false;
 
-$datos = [
-    'db_host'     => '127.0.0.1',
-    'db_port'     => '3306',
-    'db_name'     => 'sistema_contable',
-    'db_user'     => 'root',
-    'db_password' => '',
-    'app_empresa' => 'Mi Empresa S.A.',
-    'app_moneda'  => '$',
-];
+$datos = INSTALLER_DEFAULTS;
 
 if (!$alreadyConfigured && $_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ($datos as $k => $v) {
         $datos[$k] = (string)($_POST[$k] ?? $v);
     }
-    if ($datos['db_host'] === '') $errores[] = 'Host obligatorio.';
-    if ($datos['db_name'] === '') $errores[] = 'Nombre de BD obligatorio.';
-    if ($datos['db_user'] === '') $errores[] = 'Usuario de BD obligatorio.';
-    if (!preg_match('/^[a-zA-Z0-9_]+$/', $datos['db_name'])) {
-        $errores[] = 'El nombre de la BD sólo puede tener letras, números y guion bajo.';
-    }
+    // Borrar marcador de auto-install fallido si existía: el usuario está
+    // configurando manualmente, así que la próxima visita no necesita reintentar.
+    @unlink($projectRoot . '/storage/.autoinstall_failed');
 
-    if (!$errores) {
-        // 1) Probar conexión al servidor MySQL (sin BD aún)
-        try {
-            $pdo = new PDO(
-                "mysql:host={$datos['db_host']};port={$datos['db_port']};charset=utf8mb4",
-                $datos['db_user'],
-                $datos['db_password'],
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-            );
-        } catch (PDOException $e) {
-            $errores[] = 'No se pudo conectar a MySQL: ' . $e->getMessage();
-        }
-    }
-
-    if (!$errores) {
-        try {
-            // 2) Crear BD
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS `{$datos['db_name']}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            $pdo->exec("USE `{$datos['db_name']}`");
-
-            // 3) Importar schema (sin la línea CREATE/USE que ya hicimos)
-            $schema = file_get_contents($schemaFile);
-            // Eliminar las dos primeras instrucciones (CREATE DATABASE / USE)
-            $schema = preg_replace('/CREATE DATABASE[^;]+;/i', '', $schema, 1);
-            $schema = preg_replace('/USE\s+\w+\s*;/i', '', $schema, 1);
-            $pdo->exec($schema);
-
-            // 4) Importar seed (plan de cuentas)
-            $seed = file_get_contents($seedFile);
-            $seed = preg_replace('/USE\s+\w+\s*;/i', '', $seed, 1);
-            $pdo->exec($seed);
-
-            // 5) Crear usuarios demo
-            $stmt = $pdo->prepare(
-                "INSERT INTO usuarios (nombre, email, password_hash, rol, activo)
-                 VALUES (?, ?, ?, ?, 1)"
-            );
-            foreach ([
-                ['Administrador', 'admin@sistema.local',    'admin123',    'admin'],
-                ['Operador',      'operador@sistema.local', 'operador123', 'operador'],
-                ['Consulta',      'consulta@sistema.local', 'consulta123', 'consulta'],
-            ] as [$nombre, $email, $clave, $rol]) {
-                $stmt->execute([$nombre, $email, password_hash($clave, PASSWORD_BCRYPT), $rol]);
-            }
-
-            // 6) Generar config.php
-            $tpl = file_get_contents($exampleFile);
-            $cfg = strtr($tpl, [
-                "'127.0.0.1'"        => var_export($datos['db_host'], true),
-                "3306"               => (int)$datos['db_port'],
-                "'sistema_contable'" => var_export($datos['db_name'], true),
-                "'root'"              => var_export($datos['db_user'], true),
-                "'password' => ''"   => "'password' => " . var_export($datos['db_password'], true),
-                "'Mi Empresa S.A.'"  => var_export($datos['app_empresa'], true),
-                "'\$'"               => var_export($datos['app_moneda'], true),
-            ]);
-            if (file_put_contents($configFile, $cfg) === false) {
-                throw new RuntimeException("No se pudo escribir config.php (verificá permisos sobre la carpeta del proyecto).");
-            }
-
-            $ok = true;
-        } catch (Throwable $e) {
-            $errores[] = $e->getMessage();
-        }
-    }
+    $result  = runInstaller($datos);
+    $ok      = $result['ok'];
+    $errores = $result['errores'];
 }
 ?>
 <!doctype html>

@@ -103,11 +103,12 @@ layoutHead('Editar cuenta ' . $cuenta['codigo']);
     <div class="row g-3">
         <div class="col-md-4">
             <label class="form-label">Código</label>
-            <input class="form-control" name="codigo"
+            <input class="form-control codigo-cuenta" name="codigo"
                    value="<?= e($cuenta['codigo']) ?>"
                    pattern="<?= CODIGO_PATTERN_HTML ?>"
                    placeholder="<?= CODIGO_EJEMPLO ?>"
                    title="Formato: X.X.XX.XX.XX (8 dígitos, ej: <?= CODIGO_EJEMPLO ?>)"
+                   inputmode="numeric"
                    maxlength="12" required>
             <small class="text-muted">8 dígitos: <code><?= CODIGO_EJEMPLO ?></code></small>
         </div>
@@ -152,4 +153,5 @@ layoutHead('Editar cuenta ' . $cuenta['codigo']);
         <a class="btn btn-outline-secondary" href="<?= e(url('/cuentas/index.php')) ?>">Cancelar</a>
     </div>
 </form>
+<script src="<?= e(url('/assets/codigo-cuenta.js')) ?>"></script>
 <?php layoutFoot();
