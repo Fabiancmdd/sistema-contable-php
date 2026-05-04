@@ -42,6 +42,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores[] = 'Código obligatorio.';
     } elseif (!preg_match(CODIGO_PATTERN_RE, $cuenta['codigo'])) {
         $errores[] = 'Formato de código inválido. Debe ser ' . CODIGO_EJEMPLO . ' (8 dígitos: X.X.XX.XX.XX).';
+    } else {
+        $stmt = db()->prepare('SELECT id FROM cuentas WHERE codigo = ? AND id <> ?');
+        $stmt->execute([$cuenta['codigo'], $id]);
+        if ($stmt->fetchColumn()) {
+            $errores[] = 'Ya existe otra cuenta con el código ' . $cuenta['codigo'] . '.';
+        }
     }
     if ($cuenta['nombre'] === '') {
         $errores[] = 'Nombre obligatorio.';
@@ -83,7 +89,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flashSet('success', 'Cuenta actualizada.');
             redirect(url('/cuentas/index.php'));
         } catch (PDOException $e) {
-            $errores[] = 'Error al actualizar: ' . $e->getMessage();
+            if ((string)$e->getCode() === '23000') {
+                $errores[] = 'Ya existe otra cuenta con el código ' . $cuenta['codigo'] . '.';
+            } else {
+                $errores[] = 'Error al actualizar: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -109,7 +119,10 @@ layoutHead('Editar cuenta ' . $cuenta['codigo']);
                    placeholder="<?= CODIGO_EJEMPLO ?>"
                    title="Formato: X.X.XX.XX.XX (8 dígitos, ej: <?= CODIGO_EJEMPLO ?>)"
                    inputmode="numeric"
-                   maxlength="12" required>
+                   maxlength="12"
+                   data-check-url="<?= e(url('/cuentas/check_codigo.php')) ?>"
+                   data-ignore-id="<?= (int)$id ?>"
+                   required>
             <small class="text-muted">8 dígitos: <code><?= CODIGO_EJEMPLO ?></code></small>
         </div>
         <div class="col-md-8">

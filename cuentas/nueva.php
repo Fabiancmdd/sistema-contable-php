@@ -27,6 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores[] = 'Código obligatorio.';
     } elseif (!preg_match(CODIGO_PATTERN_RE, $datos['codigo'])) {
         $errores[] = 'Formato de código inválido. Debe ser ' . CODIGO_EJEMPLO . ' (8 dígitos: X.X.XX.XX.XX).';
+    } else {
+        $stmt = db()->prepare('SELECT id FROM cuentas WHERE codigo = ?');
+        $stmt->execute([$datos['codigo']]);
+        if ($stmt->fetchColumn()) {
+            $errores[] = 'Ya existe una cuenta con el código ' . $datos['codigo'] . '.';
+        }
     }
     if ($datos['nombre'] === '') {
         $errores[] = 'Nombre obligatorio.';
@@ -61,7 +67,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flashSet('success', 'Cuenta creada.');
             redirect(url('/cuentas/index.php'));
         } catch (PDOException $e) {
-            $errores[] = 'No se pudo crear (¿código duplicado?). ' . $e->getMessage();
+            // Por si la verificación previa lo dejó pasar (race condition):
+            // detectar la violación de unicidad y mostrar mensaje amigable.
+            if ((string)$e->getCode() === '23000') {
+                $errores[] = 'Ya existe una cuenta con el código ' . $datos['codigo'] . '.';
+            } else {
+                $errores[] = 'No se pudo crear: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -82,7 +94,9 @@ layoutHead('Nueva cuenta');
                    placeholder="<?= CODIGO_EJEMPLO ?>"
                    title="Formato: X.X.XX.XX.XX (8 dígitos, ej: <?= CODIGO_EJEMPLO ?>)"
                    inputmode="numeric"
-                   maxlength="12" required>
+                   maxlength="12"
+                   data-check-url="<?= e(url('/cuentas/check_codigo.php')) ?>"
+                   required>
             <small class="text-muted">8 dígitos: <code><?= CODIGO_EJEMPLO ?></code></small>
         </div>
         <div class="col-md-8">
