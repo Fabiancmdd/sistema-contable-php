@@ -3,6 +3,10 @@ declare(strict_types=1);
 require_once __DIR__ . '/../includes/layout.php';
 requireRole('admin','operador');
 
+const CODIGO_PATTERN_RE   = '/^\d\.\d\.\d{2}\.\d{2}\.\d{2}$/';
+const CODIGO_PATTERN_HTML = '\d\.\d\.\d{2}\.\d{2}\.\d{2}';
+const CODIGO_EJEMPLO      = '1.0.00.00.00';
+
 $padres = db()->query('SELECT id, codigo, nombre FROM cuentas WHERE imputable = 0 ORDER BY codigo')->fetchAll();
 
 $errores = [];
@@ -19,10 +23,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $datos['imputable'] = isset($_POST['imputable']) ? 1 : 0;
     $datos['activo']    = isset($_POST['activo'])    ? 1 : 0;
 
-    if ($datos['codigo'] === '') $errores[] = 'Código obligatorio.';
-    if ($datos['nombre'] === '') $errores[] = 'Nombre obligatorio.';
+    if ($datos['codigo'] === '') {
+        $errores[] = 'Código obligatorio.';
+    } elseif (!preg_match(CODIGO_PATTERN_RE, $datos['codigo'])) {
+        $errores[] = 'Formato de código inválido. Debe ser ' . CODIGO_EJEMPLO . ' (8 dígitos: X.X.XX.XX.XX).';
+    } else {
+        $stmt = db()->prepare('SELECT id FROM cuentas WHERE codigo = ?');
+        $stmt->execute([$datos['codigo']]);
+        if ($stmt->fetchColumn()) {
+            $errores[] = 'Ya existe una cuenta con el código ' . $datos['codigo'] . '.';
+        }
+    }
+    if ($datos['nombre'] === '') {
+        $errores[] = 'Nombre obligatorio.';
+    } elseif (mb_strlen($datos['nombre']) < 2 || mb_strlen($datos['nombre']) > 150) {
+        $errores[] = 'Nombre debe tener entre 2 y 150 caracteres.';
+    }
     if (!in_array($datos['tipo'], ['activo','pasivo','patrimonio','ingreso','egreso'], true)) {
         $errores[] = 'Tipo inválido.';
+    }
+    if ($datos['padre_id'] !== '') {
+        $stmt = db()->prepare('SELECT imputable FROM cuentas WHERE id = ?');
+        $stmt->execute([(int)$datos['padre_id']]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            $errores[] = 'Cuenta padre inexistente.';
+        } elseif ((int)$row['imputable'] === 1) {
+            $errores[] = 'La cuenta padre no puede ser imputable.';
+        }
     }
 
     if (!$errores) {
@@ -39,14 +67,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flashSet('success', 'Cuenta creada.');
             redirect(url('/cuentas/index.php'));
         } catch (PDOException $e) {
-            $errores[] = 'No se pudo crear (¿código duplicado?). ' . $e->getMessage();
+            // Por si la verificación previa lo dejó pasar (race condition):
+            // detectar la violación de unicidad y mostrar mensaje amigable.
+            if ((string)$e->getCode() === '23000') {
+                $errores[] = 'Ya existe una cuenta con el código ' . $datos['codigo'] . '.';
+            } else {
+                $errores[] = 'No se pudo crear: ' . $e->getMessage();
+            }
         }
     }
 }
 
 layoutHead('Nueva cuenta');
 ?>
-<form method="post" class="col-md-7">
+<form method="post" class="col-md-7" novalidate>
     <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">
     <?php foreach ($errores as $err): ?>
         <div class="alert alert-danger"><?= e($err) ?></div>
@@ -54,15 +88,26 @@ layoutHead('Nueva cuenta');
     <div class="row g-3">
         <div class="col-md-4">
             <label class="form-label">Código</label>
-            <input class="form-control" name="codigo" value="<?= e($datos['codigo']) ?>" required>
+            <input class="form-control codigo-cuenta" name="codigo"
+                   value="<?= e($datos['codigo']) ?>"
+                   pattern="<?= CODIGO_PATTERN_HTML ?>"
+                   placeholder="<?= CODIGO_EJEMPLO ?>"
+                   title="Formato: X.X.XX.XX.XX (8 dígitos, ej: <?= CODIGO_EJEMPLO ?>)"
+                   inputmode="numeric"
+                   maxlength="12"
+                   data-check-url="<?= e(url('/cuentas/check_codigo.php')) ?>"
+                   required>
+            <small class="text-muted">8 dígitos: <code><?= CODIGO_EJEMPLO ?></code></small>
         </div>
         <div class="col-md-8">
             <label class="form-label">Nombre</label>
-            <input class="form-control" name="nombre" value="<?= e($datos['nombre']) ?>" required>
+            <input class="form-control" name="nombre"
+                   value="<?= e($datos['nombre']) ?>"
+                   minlength="2" maxlength="150" required>
         </div>
         <div class="col-md-6">
             <label class="form-label">Tipo</label>
-            <select class="form-select" name="tipo">
+            <select class="form-select" name="tipo" required>
                 <?php foreach (['activo','pasivo','patrimonio','ingreso','egreso'] as $t): ?>
                     <option value="<?= $t ?>" <?= $datos['tipo']===$t?'selected':'' ?>><?= tipoCuentaLabel($t) ?></option>
                 <?php endforeach; ?>
@@ -93,4 +138,5 @@ layoutHead('Nueva cuenta');
         <a class="btn btn-outline-secondary" href="<?= e(url('/cuentas/index.php')) ?>">Cancelar</a>
     </div>
 </form>
+<script src="<?= e(url('/assets/codigo-cuenta.js')) ?>"></script>
 <?php layoutFoot();

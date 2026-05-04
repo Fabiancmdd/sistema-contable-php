@@ -6,7 +6,10 @@ fácil de instalar y entender, no para algo "tan pro". Incluye:
 - Login con sesiones y 3 roles (`admin`, `operador`, `consulta`).
 - Módulo de **Usuarios** (alta / edición / activar / cambiar contraseña).
 - **Plan de Cuentas** jerárquico (activo / pasivo / patrimonio / ingreso / egreso),
-  con cuentas imputables vs. no imputables.
+  con cuentas imputables vs. no imputables. Códigos en formato fijo
+  `X.X.XX.XX.XX` (8 dígitos, solo números y puntos), validados en cliente y
+  servidor. CRUD completo: alta / edición / borrado (con guardas) / listado /
+  vista de impresión. Sin tope de cantidad.
 - **Comprobantes** con cabecera + detalles (debe / haber), validación de partida
   doble (`debe = haber`) y numeración automática.
 - **Libro Diario**, **Libro Mayor** (con saldo inicial y saldo corriente) y
@@ -25,16 +28,16 @@ fácil de instalar y entender, no para algo "tan pro". Incluye:
 
 ## Instalación
 
-### Opción A — Asistente web (recomendada, ideal para XAMPP / WAMP / MAMP)
+### Opción A — Auto-instalación (recomendada, ideal para XAMPP / WAMP / MAMP)
 
 1. Copiar la carpeta del proyecto en `htdocs/` (XAMPP) o equivalente.
-2. Abrir en el navegador: `http://localhost/<carpeta>/setup.php`
-3. Completar el formulario (host, usuario, password de MySQL, nombre de la BD,
-   datos de la empresa) y darle a **Instalar**.
-4. El asistente crea `config.php`, la base de datos, las tablas, el plan de
-   cuentas inicial y 3 usuarios demo. Después, redirige al login.
-5. Cualquier página antes de configurar redirige automáticamente a
-   `setup.php`, así que no hace falta recordar la URL.
+2. Abrir en el navegador: `http://localhost/<carpeta>/`
+3. **Listo.** Si tu MySQL usa los defaults de XAMPP
+   (`127.0.0.1` / `root` / sin password), el sistema crea solo la BD, las
+   tablas, el plan de cuentas y los 3 usuarios demo, y te lleva al login.
+4. Si tu MySQL tiene otra configuración (por ejemplo password de root
+   distinta), te muestra automáticamente el asistente web `setup.php`
+   donde podés ingresar host / usuario / password / nombre de BD.
 
 ### Opción B — Por consola
 

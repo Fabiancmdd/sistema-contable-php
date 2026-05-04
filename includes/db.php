@@ -2,9 +2,10 @@
 declare(strict_types=1);
 
 /**
- * Si todavía no existe config.php redirige al asistente web (setup.php).
- * Esto se ejecuta antes de db() y appConfig() para que cualquier página
- * disparada antes de configurar muestre el wizard en vez de un error.
+ * Si todavía no existe config.php intenta auto-instalación silenciosa con los
+ * defaults de XAMPP (root@127.0.0.1, sin password, db sistema_contable). Si
+ * eso funciona el usuario nunca ve el wizard. Si falla (por ejemplo MySQL
+ * tiene otra contraseña) cae al asistente web (setup.php).
  */
 function _ensureConfigured(): void
 {
@@ -18,6 +19,13 @@ function _ensureConfigured(): void
     $script = $_SERVER['SCRIPT_NAME'] ?? '';
     if (str_ends_with($script, '/setup.php')) return;
 
+    // 1) Intentar auto-instalación silenciosa (XAMPP por defecto).
+    require_once __DIR__ . '/installer.php';
+    if (tryAutoInstall()) {
+        return; // config.php ya existe, db()/appConfig() siguen normalmente.
+    }
+
+    // 2) Fallback: redirigir al wizard manual.
     // Calcular base path (mismo método que helpers::basePath, duplicado acá
     // porque helpers.php podría no haberse cargado todavía).
     $projectRoot = str_replace('\\', '/', dirname(__DIR__));
